@@ -18,12 +18,12 @@ public class EventService {
 
 	private final EventRepository repo;
 
-	public Event create(Event event) {
+	public Event createEvent(Event event) {
 		log.info("Creating new event: {}", event.getName());
 		return repo.save(event);
 	}
 
-	public Event get(Long id) {
+	public Event getEventDetails(Long id) throws EventNotFoundException {
 		log.debug("Fetching event with ID: {}", id);
 		return repo.findById(id).orElseThrow(() -> {
 			log.error("Event not found with ID: {}", id);
@@ -31,7 +31,7 @@ public class EventService {
 		});
 	}
 
-	public List<Event> getAll(String location, LocalDate date) {
+	public List<Event> getAllEvents(String location, LocalDate date) {
 		if (location != null && date != null) {
 			log.info("Searching events in location '{}' on '{}'", location, date);
 			return repo.findByLocationAndDate(location, date);
@@ -40,33 +40,33 @@ public class EventService {
 		return repo.findAll();
 	}
 
-	public Event update(Long id, Event updated) {
+	public Event updateEvent(Long id, Event updated) throws EventNotFoundException {
 		log.info("Updating event ID: {}", id);
-		Event event = get(id);
+		Event event = getEventDetails(id);
 		event.setName(updated.getName());
-		event.setLocation(updated.getLocation());
+		//event.setLocation(updated.getLocation());
 		event.setDate(updated.getDate());
 		event.setDescription(updated.getDescription());
 		event.setTotalSeats(updated.getTotalSeats());
 		return repo.save(event);
 	}
 
-	public void delete(Long id) {
+	public void deleteEvent(Long id) throws EventNotFoundException {
 		log.warn("Deleting event ID: {}", id);
-		Event event = get(id);
+		Event event = getEventDetails(id);
 		repo.delete(event);
 	}
 
-	public int getAvailableSeats(Long id) {
-		Event event = get(id);
+	public int getAvailableSeats(Long id) throws EventNotFoundException {
+		Event event = getEventDetails(id);
 		int available = event.getTotalSeats() - event.getBookedSeats();
 		log.info("Available seats for event ID {}: {}", id, available);
 		return available;
 	}
 
-	public void updateBookedSeats(Long id, int newBookedSeats) {
+	public void updateBookedSeats(Long id, int newBookedSeats) throws EventNotFoundException {
 		log.info("Updating booked seats for event ID {} to {}", id, newBookedSeats);
-		Event event = get(id);
+		Event event = getEventDetails(id);
 		event.setBookedSeats(newBookedSeats);
 		repo.save(event);
 	}

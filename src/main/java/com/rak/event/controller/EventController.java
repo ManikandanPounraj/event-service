@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.rak.event.exception.EventNotFoundException;
 import com.rak.event.model.Event;
 import com.rak.event.service.EventService;
 
@@ -36,7 +37,7 @@ public class EventController {
 	@Operation(summary = "Create new event")
 	public ResponseEntity<Event> create(@Validated @RequestBody Event event) {
 		log.info("Received request to create event: {}", event.getName());
-		return ResponseEntity.status(201).body(service.create(event));
+		return ResponseEntity.status(201).body(service.createEvent(event));
 	}
 
 	@GetMapping
@@ -44,41 +45,41 @@ public class EventController {
 	public ResponseEntity<List<Event>> getAll(@RequestParam(required = false) String location,
 			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
 		log.debug("Requesting event list with location={}, date={}", location, date);
-		return ResponseEntity.ok(service.getAll(location, date));
+		return ResponseEntity.ok(service.getAllEvents(location, date));
 	}
 
 	@GetMapping("/{id}")
 	@Operation(summary = "Get event by ID")
-	public ResponseEntity<Event> get(@PathVariable Long id) {
+	public ResponseEntity<Event> get(@PathVariable Long id) throws EventNotFoundException {
 		log.debug("Fetching event ID: {}", id);
-		return ResponseEntity.ok(service.get(id));
+		return ResponseEntity.ok(service.getEventDetails(id));
 	}
 
 	@PutMapping("/{id}")
 	@Operation(summary = "Update an event")
-	public ResponseEntity<Event> update(@PathVariable Long id, @Validated @RequestBody Event updated) {
+	public ResponseEntity<Event> update(@PathVariable Long id, @Validated @RequestBody Event updated) throws EventNotFoundException {
 		log.info("Updating event ID: {}", id);
-		return ResponseEntity.ok(service.update(id, updated));
+		return ResponseEntity.ok(service.updateEvent(id, updated));
 	}
 
 	@DeleteMapping("/{id}")
 	@Operation(summary = "Delete event by ID")
-	public ResponseEntity<Void> delete(@PathVariable Long id) {
+	public ResponseEntity<Void> delete(@PathVariable Long id) throws EventNotFoundException {
 		log.warn("Received request to delete event ID: {}", id);
-		service.delete(id);
+		service.deleteEvent(id);
 		return ResponseEntity.noContent().build();
 	}
 
 	@GetMapping("/{id}/availability")
 	@Operation(summary = "Check available seats for an event")
-	public ResponseEntity<Integer> getAvailability(@PathVariable Long id) {
+	public ResponseEntity<Integer> getAvailability(@PathVariable Long id) throws EventNotFoundException {
 		log.debug("Checking seat availability for event ID: {}", id);
 		return ResponseEntity.ok(service.getAvailableSeats(id));
 	}
 
 	@PutMapping("/{id}/bookedSeats")
 	@Operation(summary = "Update booked seat count")
-	public ResponseEntity<Void> updateBookedSeats(@PathVariable Long id, @RequestBody Map<String, Integer> req) {
+	public ResponseEntity<Void> updateBookedSeats(@PathVariable Long id, @RequestBody Map<String, Integer> req) throws EventNotFoundException {
 		log.info("Updating booked seats for event ID {}: {}", id, req.get("bookedSeats"));
 		service.updateBookedSeats(id, req.get("bookedSeats"));
 		return ResponseEntity.ok().build();

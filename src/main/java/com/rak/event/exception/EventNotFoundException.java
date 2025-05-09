@@ -1,6 +1,6 @@
 package com.rak.event.exception;
 
-public class EventNotFoundException extends RuntimeException {
+public class EventNotFoundException extends Exception {
 	/**
 	 * 
 	 */
