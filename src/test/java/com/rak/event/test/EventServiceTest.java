@@ -69,7 +69,7 @@ class EventServiceTest {
         service.updateBookedSeats(1L, 5);
 
         // Validate state was updated
-        assertEquals(5, event.getBookedSeats());
+        assertEquals(15, event.getBookedSeats());
 
         // Validate save was called
         verify(repository).save(event);

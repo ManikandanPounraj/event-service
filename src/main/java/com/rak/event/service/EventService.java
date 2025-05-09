@@ -44,7 +44,7 @@ public class EventService {
 		log.info("Updating event ID: {}", id);
 		Event event = getEventDetails(id);
 		event.setName(updated.getName());
-		//event.setLocation(updated.getLocation());
+		// event.setLocation(updated.getLocation());
 		event.setDate(updated.getDate());
 		event.setDescription(updated.getDescription());
 		event.setTotalSeats(updated.getTotalSeats());
@@ -67,7 +67,18 @@ public class EventService {
 	public void updateBookedSeats(Long id, int newBookedSeats) throws EventNotFoundException {
 		log.info("Updating booked seats for event ID {} to {}", id, newBookedSeats);
 		Event event = getEventDetails(id);
-		event.setBookedSeats(newBookedSeats);
-		repo.save(event);
+		int newBooked = event.getBookedSeats() + newBookedSeats;
+	    
+	    if (newBooked < 0) {
+	        throw new IllegalStateException("Invalid seat update: would exceed bounds.");
+	    }
+
+	    event.setBookedSeats(newBooked);
+	   
+	    repo.save(event);
+
+	    log.info("Event {}: bookedSeats={}", id, newBooked);
 	}
+
+	
 }

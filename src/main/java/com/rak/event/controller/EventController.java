@@ -81,7 +81,8 @@ public class EventController {
 	@Operation(summary = "Update booked seat count")
 	public ResponseEntity<Void> updateBookedSeats(@PathVariable Long id, @RequestBody Map<String, Integer> req) throws EventNotFoundException {
 		log.info("Updating booked seats for event ID {}: {}", id, req.get("bookedSeats"));
-		service.updateBookedSeats(id, req.get("bookedSeats"));
-		return ResponseEntity.ok().build();
+		int count = req.getOrDefault("bookedSeats", 0);
+	    service.updateBookedSeats(id, count);
+	    return ResponseEntity.ok().build();
 	}
 }
